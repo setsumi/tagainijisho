@@ -102,7 +102,7 @@ jobs:
   # If this version is tagged, release the assets on the corresponding Github release page.
   release:
     name: Upload release assets
-    # if: startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/')
     needs: [package-source, build]
     runs-on: ubuntu-20.04
 
