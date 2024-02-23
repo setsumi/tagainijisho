@@ -38,15 +38,9 @@ jobs:
     strategy:
       matrix:
         sys:
-          - os: ubuntu-20.04
-            shell: bash
-            install_prefix: /usr
           - os: windows-2019
             shell: 'msys2 {0}'
             install_prefix: 'c:/Program Files/Tagaini Jisho'
-          - os: macos-latest
-            shell: bash
-            install_prefix: '/Applications'
 
     defaults:
       run:
@@ -57,14 +51,6 @@ jobs:
       with:
         name: Source package
 
-    - name: Update packages database (Ubuntu)
-      if: runner.os == 'Linux'
-      run: sudo apt-get update
-
-    - name: Install Qt5 (Ubuntu)
-      if: runner.os == 'Linux'
-      run: sudo apt-get install -y qtbase5-dev qtbase5-dev-tools qttools5-dev
-
     - name: Install MSYS2 and Qt5 (Windows)
       if: runner.os == 'Windows'
       uses: msys2/setup-msys2@v2
@@ -72,10 +58,6 @@ jobs:
         msystem: MINGW64
         update: true
         install: gzip mingw-w64-x86_64-toolchain mingw-w64-x86_64-zlib mingw-w64-x86_64-qt5-static mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja mingw-w64-x86_64-nsis
-
-    - name: Install Qt5 (Mac OS)
-      if: runner.os == 'macos'
-      run: brew install qt@5
 
     - name: Extract source package
       run: tar xvf tagainijisho-*.tar.gz --strip 1
@@ -103,41 +85,10 @@ jobs:
       run: cmake --build . -j2
       working-directory: ${{github.workspace}}/build
 
-    - name: Create DEB package (Ubuntu)
-      if: runner.os == 'Linux'
-      run: cpack -G DEB
-      working-directory: ${{github.workspace}}/build
-
-    - name: Create RPM package (Ubuntu)
-      if: runner.os == 'Linux'
-      run: cpack -G RPM
-      working-directory: ${{github.workspace}}/build
-
     - name: Create NSIS installer (Windows)
       if: runner.os == 'Windows'
       run: cpack -G NSIS
       working-directory: ${{github.workspace}}/build
-
-    - name: Create DragNDrop installer (Mac OS)
-      if: runner.os == 'macos'
-      run: cpack -G DragNDrop
-      working-directory: ${{github.workspace}}/build
-
-    - name: Upload DEB package (Ubuntu)
-      if: runner.os == 'Linux'
-      uses: actions/upload-artifact@v2
-      with:
-        name: DEB package
-        path: ${{github.workspace}}/build/tagainijisho-*.deb
-        retention-days: 7
-
-    - name: Upload RPM package (Ubuntu)
-      if: runner.os == 'Linux'
-      uses: actions/upload-artifact@v2
-      with:
-        name: RPM package
-        path: ${{github.workspace}}/build/tagainijisho-*.rpm
-        retention-days: 7
 
     - name: Upload NSIS installer (Windows)
       if: runner.os == 'Windows'
@@ -147,13 +98,6 @@ jobs:
         path: ${{github.workspace}}/build/tagainijisho-*.exe
         retention-days: 7
 
-    - name: Upload DragNDrop installer (Mac OS)
-      if: runner.os == 'macos'
-      uses: actions/upload-artifact@v2
-      with:
-        name: Mac OS installer
-        path: ${{github.workspace}}/build/Tagaini Jisho-*.dmg
-        retention-days: 7
 
   # If this version is tagged, release the assets on the corresponding Github release page.
   release:
@@ -168,22 +112,10 @@ jobs:
         name: Source package
     - uses: actions/download-artifact@v2
       with:
-        name: DEB package
-    - uses: actions/download-artifact@v2
-      with:
-        name: RPM package
-    - uses: actions/download-artifact@v2
-      with:
         name: Windows installer
-    - uses: actions/download-artifact@v2
-      with:
-        name: Mac OS installer
     - name: Upload assets
       uses: softprops/action-gh-release@v1
       with:
         files: |
           tagainijisho-*.tar.gz
-          tagainijisho-*.deb
-          tagainijisho-*.rpm
           tagainijisho-*.exe
-          Tagaini Jisho-*.dmg
