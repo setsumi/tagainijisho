@@ -75,12 +75,6 @@ jobs:
       if: runner.os != 'macos'
       run: cmake -B ${{env.fixed_workspace}}/build -DCMAKE_INSTALL_PREFIX="${{matrix.sys.install_prefix}}" -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
-    - name: Configure (Mac OS)
-      if: runner.os == 'macos'
-      run: cmake -B ${{env.fixed_workspace}}/build -DCMAKE_INSTALL_PREFIX="${{matrix.sys.install_prefix}}" -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
-      env:
-        Qt5_DIR: /usr/local/opt/qt5/lib/cmake
-
     - name: Build
       run: cmake --build . -j2
       working-directory: ${{github.workspace}}/build
@@ -117,5 +111,4 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          tagainijisho-*.tar.gz
           tagainijisho-*.exe
